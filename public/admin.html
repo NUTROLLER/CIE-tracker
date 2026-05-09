@@ -83,6 +83,31 @@
             </section>
 
             <section class="card">
+                <h2>Manage Subjects</h2>
+                <form id="subject-form" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <input type="text" id="form-sub-code" placeholder="Subject Code (e.g. DAA)" required>
+                        <input type="text" id="form-sub-name" placeholder="Subject Name (e.g. Design and Analysis of Algorithms)" required>
+                    </div>
+                    <button type="submit" class="btn">Add Subject</button>
+                </form>
+                <div style="overflow-x: auto; margin-top: 15px;">
+                    <table id="subjects-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
                 <h2>All Students</h2>
                 <div style="overflow-x: auto;">
                     <table id="students-table">
@@ -101,11 +126,28 @@
                     </table>
                 </div>
             </section>
+            <section class="card" id="marks-section" style="display: none; margin-top: 20px; border: 2px solid var(--primary-color);">
+                <h2>Manage Marks for: <span id="marks-student-usn" style="color: var(--primary-color);"></span></h2>
+                <form id="marks-form" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <select id="form-subject" required style="padding: 10px; border-radius: 6px; border: 1px solid #444; background-color: #333; color: white; flex: 1;">
+                            <option value="">Select Subject...</option>
+                        </select>
+                        <input type="number" id="form-cie" placeholder="CIE Marks (Max 50)" required min="0" max="50">
+                        <input type="number" id="form-la1" placeholder="LA 1 Marks (Max 10)" required min="0" max="10">
+                        <input type="number" id="form-la2" placeholder="LA 2 Marks (Max 10)" required min="0" max="10">
+                    </div>
+                    <button type="submit" class="btn">Save Marks</button>
+                    <button type="button" class="btn btn-danger" onclick="document.getElementById('marks-section').style.display='none'">Cancel</button>
+                </form>
+            </section>
         </main>
     </div>
 
     <script>
         const API = '/api';
+        let currentManageUsn = null;
+        let subjects = [];
         
         async function loadStudents() {
             const res = await fetch(`${API}/students`);
@@ -121,12 +163,141 @@
                     <td>${s.semester}</td>
                     <td>${s.section}</td>
                     <td>
+                        <button class="btn" style="background-color: #f39c12; margin-right: 5px;" onclick="openManageMarks('${s.usn}')">Manage Marks</button>
                         <button class="btn btn-danger" onclick="deleteStudent('${s.usn}')">Delete</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
+
+        async function loadSubjects() {
+            const res = await fetch(`${API}/subjects`);
+            subjects = await res.json();
+            
+            // Populate Dropdown
+            const select = document.getElementById('form-subject');
+            select.innerHTML = '<option value="">Select Subject...</option>';
+            subjects.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub.id;
+                option.textContent = `${sub.code} - ${sub.name}`;
+                select.appendChild(option);
+            });
+
+            // Populate Table
+            const tbody = document.querySelector('#subjects-table tbody');
+            tbody.innerHTML = '';
+            subjects.forEach(sub => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${sub.code}</td>
+                    <td>${sub.name}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteSubject(${sub.id}, '${sub.code}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('subject-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                code: document.getElementById('form-sub-code').value,
+                name: document.getElementById('form-sub-name').value
+            };
+
+            try {
+                const res = await fetch(`${API}/subjects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    alert('Subject added successfully!');
+                    document.getElementById('subject-form').reset();
+                    loadSubjects(); // Reload table and dropdown
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function deleteSubject(id, code) {
+            if(confirm(`Are you sure you want to delete ${code}? This will also delete any marks associated with this subject!`)) {
+                await fetch(`${API}/subjects/${id}`, { method: 'DELETE' });
+                loadSubjects();
+            }
+        }
+
+        async function openManageMarks(usn) {
+            currentManageUsn = usn;
+            document.getElementById('marks-student-usn').textContent = usn;
+            document.getElementById('marks-section').style.display = 'block';
+            document.getElementById('marks-form').reset();
+            // Scroll to the marks section
+            document.getElementById('marks-section').scrollIntoView({ behavior: 'smooth' });
+            
+            // Optionally: Auto-load existing marks when a subject is selected
+            // Fetch all marks for this student to pre-fill if they exist
+            try {
+                const res = await fetch(`${API}/marks/${usn}`);
+                const existingMarks = await res.json();
+                
+                document.getElementById('form-subject').onchange = (e) => {
+                    const selectedSubId = parseInt(e.target.value);
+                    const mark = existingMarks.find(m => m.subject_id === selectedSubId);
+                    if (mark) {
+                        document.getElementById('form-cie').value = mark.cie_marks;
+                        document.getElementById('form-la1').value = mark.la1_marks;
+                        document.getElementById('form-la2').value = mark.la2_marks;
+                    } else {
+                        document.getElementById('form-cie').value = '';
+                        document.getElementById('form-la1').value = '';
+                        document.getElementById('form-la2').value = '';
+                    }
+                };
+            } catch (e) {
+                console.error("Failed to load existing marks");
+            }
+        }
+
+        document.getElementById('marks-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentManageUsn) return;
+            
+            const data = {
+                student_usn: currentManageUsn,
+                subject_id: parseInt(document.getElementById('form-subject').value),
+                cie_marks: parseInt(document.getElementById('form-cie').value),
+                la1_marks: parseInt(document.getElementById('form-la1').value),
+                la2_marks: parseInt(document.getElementById('form-la2').value)
+            };
+
+            try {
+                const res = await fetch(`${API}/marks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    alert('Marks saved successfully!');
+                    // Re-trigger the onchange to keep the UI in sync
+                    document.getElementById('form-subject').dispatchEvent(new Event('change'));
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        });
 
         document.getElementById('student-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -139,8 +310,6 @@
             };
 
             try {
-                // Try to create first, if it fails due to duplicate, we could implement a PUT.
-                // For simplicity, we just use POST.
                 const res = await fetch(`${API}/students`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -164,10 +333,14 @@
             if(confirm(`Are you sure you want to delete ${usn}?`)) {
                 await fetch(`${API}/students/${usn}`, { method: 'DELETE' });
                 loadStudents();
+                if (currentManageUsn === usn) {
+                    document.getElementById('marks-section').style.display = 'none';
+                }
             }
         }
 
         loadStudents();
+        loadSubjects();
     </script>
 </body>
 </html>

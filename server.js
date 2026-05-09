@@ -98,6 +98,30 @@ app.get('/api/subjects', async (req, res) => {
     }
 });
 
+// 6a. Add a new subject
+app.post('/api/subjects', async (req, res) => {
+    const { code, name } = req.body;
+    try {
+        await pool.query('INSERT INTO subjects (code, name) VALUES (?, ?)', [code, name]);
+        res.status(201).json({ message: 'Subject added successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error or duplicate code' });
+    }
+});
+
+// 6b. Delete a subject
+app.delete('/api/subjects/:id', async (req, res) => {
+    try {
+        const [result] = await pool.query('DELETE FROM subjects WHERE id=?', [req.params.id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Subject not found' });
+        res.json({ message: 'Subject deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // 7. Get marks for a student for all subjects
 app.get('/api/marks/:usn', async (req, res) => {
     try {
