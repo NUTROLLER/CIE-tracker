@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIE Tracker - Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-main {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background-color: #333;
+        }
+        .form-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .form-group input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .nav-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header card">
+            <h1 class="logo">Admin Panel</h1>
+            <div>
+                <a href="index.html" class="nav-link">← Back to Dashboard</a>
+            </div>
+        </header>
+
+        <main class="main-content admin-main">
+            <section class="card">
+                <h2>Add / Update Student</h2>
+                <form id="student-form" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <input type="text" id="form-usn" placeholder="USN (e.g. 1NT19CS025)" required>
+                        <input type="text" id="form-name" placeholder="Full Name" required>
+                        <input type="number" id="form-sem" placeholder="Semester (e.g. 5)" required>
+                        <input type="text" id="form-section" placeholder="Section (e.g. CSE - B)" required>
+                    </div>
+                    <button type="submit" class="btn">Save Student</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2>All Students</h2>
+                <div style="overflow-x: auto;">
+                    <table id="students-table">
+                        <thead>
+                            <tr>
+                                <th>USN</th>
+                                <th>Name</th>
+                                <th>Semester</th>
+                                <th>Section</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const API = '/api';
+        
+        async function loadStudents() {
+            const res = await fetch(`${API}/students`);
+            const students = await res.json();
+            const tbody = document.querySelector('#students-table tbody');
+            tbody.innerHTML = '';
+            
+            students.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.usn}</td>
+                    <td>${s.name}</td>
+                    <td>${s.semester}</td>
+                    <td>${s.section}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteStudent('${s.usn}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('student-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const usn = document.getElementById('form-usn').value;
+            const data = {
+                usn: usn,
+                name: document.getElementById('form-name').value,
+                semester: document.getElementById('form-sem').value,
+                section: document.getElementById('form-section').value
+            };
+
+            try {
+                // Try to create first, if it fails due to duplicate, we could implement a PUT.
+                // For simplicity, we just use POST.
+                const res = await fetch(`${API}/students`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    alert('Student saved!');
+                    document.getElementById('student-form').reset();
+                    loadStudents();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function deleteStudent(usn) {
+            if(confirm(`Are you sure you want to delete ${usn}?`)) {
+                await fetch(`${API}/students/${usn}`, { method: 'DELETE' });
+                loadStudents();
+            }
+        }
+
+        loadStudents();
+    </script>
+</body>
+</html>

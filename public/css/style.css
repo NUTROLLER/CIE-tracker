@@ -1,0 +1,281 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #222222;
+    --primary-color: #1ed760; /* Bright Green */
+    --primary-hover: #1db954;
+    --text-primary: #ffffff;
+    --text-secondary: #aaaaaa;
+    --progress-bg: #404040;
+    --progress-fill: #e0e0e0;
+    --progress-text-dark: #000000;
+    --progress-text-light: #ffffff;
+    --border-radius: 12px;
+    --pill-radius: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Card Styles */
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 25px 30px;
+}
+
+.logo {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.student-info {
+    text-align: right;
+}
+
+.student-info h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.student-info p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    align-self: center;
+}
+
+.search-bar input {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #333;
+    color: white;
+}
+
+.search-bar button {
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--primary-color);
+    color: var(--bg-color);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Main Content Layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 20px;
+    height: 450px;
+}
+
+/* Left Panel - Subjects */
+.subjects-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 25px 20px;
+}
+
+.subjects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    padding-right: 10px;
+    height: 100%;
+}
+
+/* Custom Scrollbar for subject list */
+.subjects-list::-webkit-scrollbar {
+    width: 6px;
+}
+.subjects-list::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 10px;
+}
+.subjects-list::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 10px;
+}
+
+.subject-btn {
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.subject-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.subject-btn.active {
+    box-shadow: 0 0 0 3px var(--bg-color), 0 0 0 5px var(--primary-color);
+}
+
+/* Right Panel - Marks Details */
+.marks-panel {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.marks-header {
+    margin-bottom: 30px;
+}
+
+.marks-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.marks-details {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    flex-grow: 1;
+}
+
+.score-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+/* Progress Bar Styles */
+.progress-container {
+    width: 80%;
+    height: 60px;
+    background-color: var(--progress-bg);
+    border-radius: var(--pill-radius);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--progress-fill);
+    border-radius: var(--pill-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.5s ease-in-out;
+}
+
+.score-text {
+    font-size: 1.4rem;
+    font-weight: 700;
+    position: absolute;
+}
+
+.score-current {
+    color: var(--progress-text-dark);
+    /* Center it inside the filled portion. Trick: position absolute and calc */
+    left: 20%; 
+}
+
+.score-max {
+    color: var(--progress-text-light);
+    right: 20px;
+    opacity: 0.5;
+}
+
+.la-container .progress-bar {
+    justify-content: center;
+}
+
+.la-score {
+    position: static; /* Center in the la-bar */
+    color: var(--progress-text-dark);
+}
+
+.loading-text {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .student-info {
+        text-align: center;
+    }
+    
+    .progress-container {
+        width: 100%;
+    }
+}

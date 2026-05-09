@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIE Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="header card">
+            <h1 class="logo">CIE Tracker</h1>
+            <div class="student-info" id="student-info-container">
+                <!-- Will be populated by JS -->
+                <h2 id="student-name">Loading...</h2>
+                <p id="student-usn">---</p>
+                <p id="student-section">---</p>
+            </div>
+            <!-- Temporary search for testing -->
+            <div class="search-bar">
+                <input type="text" id="search-usn" placeholder="Enter USN..." value="1NT19CS025">
+                <button id="search-btn">Search</button>
+            </div>
+        </header>
+
+        <!-- Main Content Section -->
+        <main class="main-content">
+            <!-- Left Panel: Subjects -->
+            <aside class="subjects-panel card">
+                <div class="subjects-list" id="subjects-list">
+                    <!-- Subjects will be populated here -->
+                    <div class="loading-text">Loading subjects...</div>
+                </div>
+            </aside>
+
+            <!-- Right Panel: Marks Details -->
+            <section class="marks-panel card">
+                <div class="marks-header">
+                    <h2 id="selected-subject-name">Select a Subject</h2>
+                    <p class="subtitle">Details</p>
+                </div>
+                
+                <div class="marks-details" id="marks-details-container" style="display: none;">
+                    <!-- CIE Progress Bar -->
+                    <div class="score-row">
+                        <div class="progress-container">
+                            <div class="progress-bar cie-bar" id="cie-bar" style="width: 0%;">
+                                <span class="score-text score-current" id="cie-score">0</span>
+                            </div>
+                            <span class="score-text score-max">50</span>
+                        </div>
+                        <div class="label">CIE</div>
+                    </div>
+
+                    <!-- LA 1 Progress Bar -->
+                    <div class="score-row">
+                        <div class="progress-container la-container">
+                            <div class="progress-bar la-bar" id="la1-bar" style="width: 0%;">
+                                <span class="score-text la-score" id="la1-score">0</span>
+                            </div>
+                            <!-- Assuming LA is out of 10 for visual representation, we can hide max if it's 10/10 visually -->
+                        </div>
+                        <div class="label">LA 1</div>
+                    </div>
+
+                    <!-- LA 2 Progress Bar -->
+                    <div class="score-row">
+                        <div class="progress-container la-container">
+                            <div class="progress-bar la-bar" id="la2-bar" style="width: 0%;">
+                                <span class="score-text la-score" id="la2-score">0</span>
+                            </div>
+                        </div>
+                        <div class="label">LA 2</div>
+                    </div>
+                </div>
+                
+                <div id="no-marks-message" class="loading-text" style="display: block;">
+                    No subject selected.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
